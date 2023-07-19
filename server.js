@@ -5,6 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const userController = require("./controllers/userController");
 const sequelize = require("./config/database");
+const cartRoutes = require("./routes/cartRoutes");
 
 // Load environment variables
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(cors());
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
 app.get("/users", userController.getAllUsers);
+app.use("/carts", cartRoutes);
 
 // Start the server
 const PORT = process.env.SERVER_PORT || 3000;
