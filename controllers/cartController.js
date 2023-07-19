@@ -1,5 +1,4 @@
-const User = require("../models/user");
-const Product = require("../models/product");
+const { Product, User } = require("../models/model");
 
 // Add a product to the user's cart
 exports.addToCart = async (req, res) => {
@@ -24,13 +23,16 @@ exports.addToCart = async (req, res) => {
     }
 
     // Add the productId to the user's cart array
-    user.cart.push(productId);
+    user.cart.push({ productId, quantity });
 
     // Save the user with the updated cart
     await user.save();
 
     res.json(user);
   } catch (err) {
+    console.log(
+      `userId: ${userId} - productId: ${productId} quantity: ${quantity} `
+    );
     res.status(500).json({ error: "Failed to add product to cart" });
   }
 };

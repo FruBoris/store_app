@@ -18,11 +18,11 @@ const Product = sequelize.define("Product", {
     type: DataTypes.FLOAT,
     allowNull: false,
   },
-  // qty: {
-  //   type: DataTypes.INTEGER,
-  //   allowNull: true,
-  //   // defaultValue: 0,
-  // },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
+  },
 });
 
 module.exports = Product;

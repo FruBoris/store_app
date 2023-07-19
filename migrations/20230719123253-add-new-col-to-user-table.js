@@ -11,8 +11,8 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.addColumn("Users", "cart", {
-      type: Sequelize.ARRAY(Sequelize.INTEGER),
+    await queryInterface.alter("Users", "cart", {
+      type: Sequelize.ARRAY(Sequelize.JSON),
       allowNull: true,
       defaultValue: [],
     });

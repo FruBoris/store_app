@@ -19,9 +19,9 @@ app.use(cors());
 
 // Routes
 app.use("/auth", authRoutes);
+app.use("/cart", cartRoutes);
 app.use("/products", productRoutes);
 app.get("/users", userController.getAllUsers);
-app.use("/carts", cartRoutes);
 
 // Start the server
 const PORT = process.env.SERVER_PORT || 3000;

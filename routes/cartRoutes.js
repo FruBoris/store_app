@@ -3,20 +3,22 @@ const router = express.Router();
 const cartController = require("../controllers/cartController");
 
 // Add a product to the cart
-router.post("/cart/add", cartController.addToCart);
+router.post("/add", async (req, res) => {
+  await cartController.addToCart(req, res);
+});
 
 // Get the user's cart
-router.get("/cart/:userId", cartController.getCart);
+router.get("/:userId", cartController.getCart);
 
 // Update the quantity of a product in the cart
-router.put("/cart/update", cartController.updateCartItemQuantity);
+router.put("/update", cartController.updateCartItemQuantity);
 
 // Remove a product from the cart
-router.delete("/cart/remove", cartController.removeCartItem);
+router.delete("/remove", cartController.removeCartItem);
 
 // Clear the entire cart
-router.delete("/cart/clear/:userId", cartController.clearCart);
+router.delete("/clear/:userId", cartController.clearCart);
 
-router.post("/cart/buy/:userId", cartController.buyCart);
+router.post("/buy/:userId", cartController.buyCart);
 
 module.exports = router;
