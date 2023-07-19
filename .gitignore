@@ -2,9 +2,11 @@
 node_modules
 /dist
 package-lock.json
+esp.js
 
 
 # local env files
 .env.local
 .env.*.local
+.env
 
