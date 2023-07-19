@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server",
-    "migrate": "sequelize db:migrate"
+    "migrate": "sequelize db:migrate",
+    "undo-imigrate": "sequelize db:migrate:undo"
   },
   "repository": {
     "type": "git",
