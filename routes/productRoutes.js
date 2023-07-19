@@ -7,18 +7,20 @@ const {
   updateProduct,
   deleteProduct,
 } = require("../controllers/productController");
+const { authenticateToken } = require("../middleware/authMware");
+
 // Get all products
-router.get("/", async (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {
   await getAllProducts(req, res);
 });
 
 // Get a specific product
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateToken, async (req, res) => {
   await getProductById(req, res);
 });
 
 // Create a new product
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken, async (req, res) => {
   await createProduct(req, res);
 });
 
@@ -28,7 +30,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete a product
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
   await deleteProduct(req, res);
 });
 
