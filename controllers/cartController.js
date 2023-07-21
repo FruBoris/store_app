@@ -76,8 +76,9 @@ exports.getCart = async (req, res) => {
     if (!cart) {
       return res.status(404).json({ error: "Cart not found" });
     }
-
-    res.json(cart.Products);
+    // const response = cart.Products;
+    // console.log(response.toString());
+    res.json(cart.Products.map((el) => el.CartProduct));
   } catch (err) {
     res.status(500).json({ error: "Failed to get cart" });
     console.log(err);
