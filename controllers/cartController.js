@@ -1,8 +1,7 @@
-const { Product, User } = require("../models/model");
+const { Product, User, Cart, CartProduct } = require("../models/model");
 
-// Add a product to the user's cart
 exports.addToCart = async (req, res) => {
-  const { userId, productId, quantity } = req.body;
+  const { userId, productId, quantity = 1 } = req.body;
 
   try {
     // Find the user by userId
@@ -17,22 +16,46 @@ exports.addToCart = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
+    // Find or create the cart for the user
+    const [cart, created] = await Cart.findOrCreate({
+      where: {
+        UserId: userId,
+      },
+    });
+
+    // Check if the product is already in the cart
+    const cartProduct = await CartProduct.findOne({
+      where: {
+        CartId: cart.id,
+        ProductId: product.id,
+      },
+    });
+
     // Check if the product has adequate quantity
     if (product.quantity < quantity) {
       return res.status(400).json({ error: "Insufficient product quantity" });
     }
 
-    // Add the productId to the user's cart array
-    user.cart.push({ productId, quantity });
+    if (cartProduct) {
+      // If the product is already in the cart, update the quantity
 
+      // reduce the product from store
+      product.quantity -= quantity;
+      await product.save();
+      cartProduct.quantity += quantity;
+      await cartProduct.save();
+    } else {
+      // Otherwise, add the product to the cart with the specified quantity
+      await cart.addProduct(product, { through: { quantity } });
+    }
     // Save the user with the updated cart
-    await user.save();
+    // await user.save();
 
-    res.json(user);
+    res.json({ cart, cartProduct, product });
   } catch (err) {
-    console.log(
-      `userId: ${userId} - productId: ${productId} quantity: ${quantity} `
-    );
+    console.log(err);
+    // const cart = (await Cart.findAll()).toString();
+    // console.log(cart);
     res.status(500).json({ error: "Failed to add product to cart" });
   }
 };
@@ -43,17 +66,21 @@ exports.getCart = async (req, res) => {
 
   try {
     // Find the user by userId
-    const user = await User.findByPk(userId, {
-      include: [{ model: Product, attributes: ["id", "name", "price"] }],
+    // const user = await User.findByPk(userId, {
+    //   include: [{ model: Product, attributes: ["id", "name", "price"] }],
+    // });
+    const cart = await Cart.findOne({
+      where: { UserId: userId },
+      include: Product,
     });
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    if (!cart) {
+      return res.status(404).json({ error: "Cart not found" });
     }
 
-    res.json(user.cart);
+    res.json(cart.Products);
   } catch (err) {
     res.status(500).json({ error: "Failed to get cart" });
+    console.log(err);
   }
 };
 
