@@ -81,11 +81,21 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
+const updateProductQty = async (id, qty) => {
+  try {
+    const product = await Product.findByPk(id);
+    product.quantity += qty;
+    await product.save();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 module.exports = {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
+  updateProductQty,
 };

@@ -1,4 +1,5 @@
 const { Product, User, Cart, CartProduct } = require("../models/model");
+const { updateProductQty } = require("./productController");
 
 exports.addToCart = async (req, res) => {
   const { userId, productId, quantity = 1 } = req.body;
@@ -146,11 +147,25 @@ exports.removeCartItem = async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-    // Remove the product from the cart array
-    await cart.removeProduct(product);
-    // Save the user with the updated cart
-    // await user.save();
 
+    // Making sure the qty is put back into the store before removing from cart
+    const qtyToAdd = await Cart.findOne({
+      where: { UserId: userId },
+      include: [
+        {
+          model: Product,
+          where: { id: productId },
+          through: { attributes: ["quantity"] },
+        },
+      ],
+      through: { attributes: ["Products"] },
+    });
+    const t = parseInt(qtyToAdd.Products[0].CartProduct.quantity);
+    updateProductQty(productId, t);
+
+    // Remove the product from the cart array
+    // await cart.removeProduct(product);
+    const count = 0;
     res.json("Product Removed from Cart Successfully");
   } catch (err) {
     res.status(500).json({ error: "Failed to remove cart item" });
