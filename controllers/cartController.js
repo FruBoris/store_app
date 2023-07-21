@@ -65,10 +65,6 @@ exports.getCart = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // Find the user by userId
-    // const user = await User.findByPk(userId, {
-    //   include: [{ model: Product, attributes: ["id", "name", "price"] }],
-    // });
     const cart = await Cart.findOne({
       where: { UserId: userId },
       include: Product,
@@ -76,8 +72,6 @@ exports.getCart = async (req, res) => {
     if (!cart) {
       return res.status(404).json({ error: "Cart not found" });
     }
-    // const response = cart.Products;
-    // console.log(response.toString());
     res.json(cart.Products.map((el) => el.CartProduct));
   } catch (err) {
     res.status(500).json({ error: "Failed to get cart" });
@@ -90,16 +84,13 @@ exports.updateCartItemQuantity = async (req, res) => {
   const { userId, productId, quantity } = req.body;
 
   try {
-    // Find the user by userId
-    const user = await User.findByPk(userId);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Check if the product is in the user's cart
-    const index = user.cart.indexOf(productId);
-    if (index === -1) {
-      return res.status(404).json({ error: "Product not found in the cart" });
+    // Find the cart by userId
+    const cart = await Cart.findOne({
+      where: { UserId: userId },
+      include: Product,
+    });
+    if (!cart) {
+      return res.status(404).json({ error: "Cart not found" });
     }
 
     // Find the product by productId
@@ -114,14 +105,25 @@ exports.updateCartItemQuantity = async (req, res) => {
     }
 
     // Update the quantity in the user's cart array
-    user.cart[index] = productId;
+    await cart.addProduct(product, { through: { quantity } });
 
-    // Save the user with the updated cart
-    await user.save();
-
-    res.json(user.cart);
+    res.json(
+      cart.Products.filter((el) => el.CartProduct.ProductId == productId).map(
+        (el, arr) => {
+          product.quantity += el.CartProduct.quantity - quantity;
+          product.save();
+          const obj = {
+            name: `${el.name}`,
+            old_QtyInCart: `${el.CartProduct.quantity}`,
+            new_QtyInCart: `${quantity}`,
+          };
+          return obj;
+        }
+      )
+    );
   } catch (err) {
     res.status(500).json({ error: "Failed to update cart item quantity" });
+    console.log(err);
   }
 };
 
