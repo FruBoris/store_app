@@ -132,25 +132,26 @@ exports.removeCartItem = async (req, res) => {
   const { userId, productId } = req.body;
 
   try {
-    // Find the user by userId
-    const user = await User.findByPk(userId);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    // Find the cart by userId
+    const cart = await Cart.findOne({
+      where: { UserId: userId },
+      include: Product,
+    });
+    if (!cart) {
+      return res.status(404).json({ error: "Cart not found" });
     }
 
-    // Check if the product is in the user's cart
-    const index = user.cart.indexOf(productId);
-    if (index === -1) {
-      return res.status(404).json({ error: "Product not found in the cart" });
+    // Find the product by productId
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
     }
-
     // Remove the product from the cart array
-    user.cart.splice(index, 1);
-
+    await cart.removeProduct(product);
     // Save the user with the updated cart
-    await user.save();
+    // await user.save();
 
-    res.json(user.cart);
+    res.json("Product Removed from Cart Successfully");
   } catch (err) {
     res.status(500).json({ error: "Failed to remove cart item" });
   }
