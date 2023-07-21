@@ -164,7 +164,7 @@ exports.removeCartItem = async (req, res) => {
     updateProductQty(productId, t);
 
     // Remove the product from the cart array
-    // await cart.removeProduct(product);
+    await cart.removeProduct(product);
     const count = 0;
     res.json("Product Removed from Cart Successfully");
   } catch (err) {
