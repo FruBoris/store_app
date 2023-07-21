@@ -38,11 +38,11 @@ exports.addToCart = async (req, res) => {
     }
 
     if (cartProduct) {
-      // If the product is already in the cart, update the quantity
-
       // reduce the product from store
       product.quantity -= quantity;
       await product.save();
+
+      // If the product is already in the cart, update the quantity
       cartProduct.quantity += quantity;
       await cartProduct.save();
     } else {
@@ -177,21 +177,37 @@ exports.clearCart = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // Find the user by userId
-    const user = await User.findByPk(userId);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    // Find the cart by userId
+    const cart = await Cart.findOne({
+      where: { UserId: userId },
+      include: Product,
+    });
+    if (!cart) {
+      return res.status(404).json({ error: "Cart not found" });
+    }
+    const userCart = await CartProduct.findAll({
+      where: { CartId: cart.id },
+    });
+    if (userCart.length > 0) {
+      userCart.map((el) =>
+        // update the store before Clearing
+        updateProductQty(el.ProductId, parseInt(el.quantity))
+      );
+    } else {
+      res.json("User Cart is empty");
     }
 
     // Clear the cart array
-    user.cart = [];
+    await CartProduct.destroy({
+      where: {
+        CartId: cart.id,
+      },
+    });
 
-    // Save the user with the cleared cart
-    await user.save();
-
-    res.json(user.cart);
+    res.json("User Cart Completely removed");
   } catch (err) {
     res.status(500).json({ error: "Failed to clear cart" });
+    console.log(err);
   }
 };
 
