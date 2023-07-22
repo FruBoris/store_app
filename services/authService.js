@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { User } = require("../models/model");
+const { json } = require("sequelize");
 
 const generateToken = (user) => {
   const token = jwt.sign(
@@ -33,7 +34,12 @@ const loginUser = async (email, password) => {
     throw new Error("Invalid email or password");
   }
   const token = generateToken(user);
-  return token;
+  const res = {
+    token,
+    expIn: "1",
+  };
+
+  return { token, expiresIn: "1h" };
 };
 
 module.exports = { registerUser, loginUser };

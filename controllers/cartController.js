@@ -1,5 +1,6 @@
 const { Product, User, Cart, CartProduct } = require("../models/model");
 const { updateProductQty } = require("./productController");
+const filter = require("../services/filterService");
 
 exports.addToCart = async (req, res) => {
   const { userId, productId, quantity = 1 } = req.body;
@@ -49,14 +50,10 @@ exports.addToCart = async (req, res) => {
       // Otherwise, add the product to the cart with the specified quantity
       await cart.addProduct(product, { through: { quantity } });
     }
-    // Save the user with the updated cart
-    // await user.save();
 
     res.json({ cart, cartProduct, product });
   } catch (err) {
     console.log(err);
-    // const cart = (await Cart.findAll()).toString();
-    // console.log(cart);
     res.status(500).json({ error: "Failed to add product to cart" });
   }
 };
@@ -68,12 +65,35 @@ exports.getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({
       where: { UserId: userId },
-      include: Product,
+      include: [
+        {
+          model: Product,
+          attributes: ["id", "name", "category", "price"],
+          // require: true,
+        },
+      ],
+    });
+    const orderItem = await CartProduct.findOne({
+      where: { CartId: cart.id },
     });
     if (!cart) {
       return res.status(404).json({ error: "Cart not found" });
     }
-    res.json(cart.Products.map((el) => el.CartProduct));
+
+    const output = cart.Products.map((item) => {
+      return {
+        ProductId: item.id,
+        name: item.name,
+        category: item.category,
+        price: item.price,
+        quantity: item.CartProduct.quantity,
+        createAt: item.CartProduct.createdAt,
+      };
+    });
+
+    const t = filter(req, output);
+    // res.json(cart.Products.map((el) => el));
+    res.json({ params: req.query, t });
   } catch (err) {
     res.status(500).json({ error: "Failed to get cart" });
     console.log(err);
@@ -189,22 +209,24 @@ exports.clearCart = async (req, res) => {
       where: { CartId: cart.id },
     });
     if (userCart.length > 0) {
-      userCart.map((el) =>
-        // update the store before Clearing
-        updateProductQty(el.ProductId, parseInt(el.quantity))
+      userCart.map(
+        (el) =>
+          // update the store before Clearing
+          // updateProductQty(el.ProductId, parseInt(el.quantity))
+          ""
       );
     } else {
       res.json("User Cart is empty");
     }
 
     // Clear the cart array
-    await CartProduct.destroy({
-      where: {
-        CartId: cart.id,
-      },
-    });
+    // await CartProduct.destroy({
+    //   where: {
+    //     CartId: cart.id,
+    //   },
+    // });
 
-    res.json("User Cart Completely removed");
+    res.json(userCart);
   } catch (err) {
     res.status(500).json({ error: "Failed to clear cart" });
     console.log(err);
