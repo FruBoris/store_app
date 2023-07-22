@@ -5,6 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const userController = require("./controllers/userController");
 const sequelize = require("./config/database");
+const cartRoutes = require("./routes/cartRoutes");
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(cors());
 
 // Routes
 app.use("/auth", authRoutes);
+app.use("/cart", cartRoutes);
 app.use("/products", productRoutes);
 app.get("/users", userController.getAllUsers);
 

@@ -1,4 +1,4 @@
-const Product = require("../models/product");
+const { Product } = require("../models/model");
 
 // Get all products
 const getAllProducts = async (req, res) => {
@@ -28,9 +28,15 @@ const getProductById = async (req, res) => {
 
 // Create a new product
 const createProduct = async (req, res) => {
-  const { name, size, category, price } = req.body;
+  const { name, size, category, price, quantity } = req.body;
   try {
-    const product = await Product.create({ name, size, category, price });
+    const product = await Product.create({
+      name,
+      size,
+      category,
+      price,
+      quantity,
+    });
     res.status(201).json(product);
   } catch (error) {
     console.error(error);
@@ -41,7 +47,7 @@ const createProduct = async (req, res) => {
 // Update a product
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, size, category, price } = req.body;
+  const { name, size, category, price, quantity } = req.body;
   try {
     const product = await Product.findByPk(id);
     if (!product) {
@@ -51,6 +57,7 @@ const updateProduct = async (req, res) => {
     product.size = size;
     product.category = category;
     product.price = price;
+    product.quantity = quantity;
     await product.save();
     res.json(product);
   } catch (error) {
@@ -74,11 +81,21 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
+const updateProductQty = async (id, qty) => {
+  try {
+    const product = await Product.findByPk(id);
+    product.quantity += qty;
+    await product.save();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 module.exports = {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
+  updateProductQty,
 };
