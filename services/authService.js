@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { User } = require("../models/model");
+const { User, Vendor } = require("../models/model");
 const { json } = require("sequelize");
 
 const generateToken = (user) => {
@@ -20,8 +20,14 @@ const comparePasswords = async (password, hashedPassword) => {
 
 const registerUser = async (name, email, password) => {
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({ name, email, password: hashedPassword });
-  return user;
+  const vendor = await User.create({ name, email, password: hashedPassword });
+  return vendor;
+};
+
+const registerVendor = async (name, email, password, category, balance) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const vendor = await User.create({ name, email, password: hashedPassword });
+  return vendor;
 };
 
 const loginUser = async (email, password) => {
@@ -41,5 +47,22 @@ const loginUser = async (email, password) => {
 
   return { token, expiresIn: "1h" };
 };
+const loginVendor = async (email, password) => {
+  const vendor = await User.findOne({ where: { email } });
+  if (!vendor) {
+    throw new Error("Invalid email or password");
+  }
+  const isPasswordValid = await comparePasswords(password, vendor.password);
+  if (!isPasswordValid) {
+    throw new Error("Invalid email or password");
+  }
+  const token = generateToken(vendor);
+  const res = {
+    token,
+    expIn: "1",
+  };
 
-module.exports = { registerUser, loginUser };
+  return { token, expiresIn: "1h" };
+};
+
+module.exports = { registerUser, loginUser, loginVendor, registerVendor };

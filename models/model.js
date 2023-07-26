@@ -25,4 +25,4 @@ Vendor.hasMany(Payment);
 Payment.belongsTo(Vendor);
 
 sequelize.sync();
-module.exports = { Product, Cart, CartProduct, User };
+module.exports = { Product, Cart, CartProduct, User, Vendor, Payment };

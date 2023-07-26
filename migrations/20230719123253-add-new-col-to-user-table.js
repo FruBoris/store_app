@@ -10,12 +10,12 @@ module.exports = {
      *
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
-    await queryInterface.alter("Users", "cart", {
-      type: Sequelize.ARRAY(Sequelize.JSON),
-      allowNull: true,
-      defaultValue: [],
-    });
+    //  */
+    // await queryInterface.alter("Users", "cart", {
+    //   type: Sequelize.ARRAY(Sequelize.JSON),
+    //   allowNull: true,
+    //   defaultValue: [],
+    // });
   },
 
   async down(queryInterface, Sequelize) {
